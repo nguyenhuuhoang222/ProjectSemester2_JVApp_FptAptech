@@ -6,4 +6,5 @@ module t12311m0.shoes_store {
     exports t12311m0.shoes_store;
     requires java.sql;
     requires com.oracle.database.jdbc;
+    requires java.base;
 }

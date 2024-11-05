@@ -29,7 +29,7 @@
                     <children>
                         <Label layoutX="65.0" layoutY="68.0" text="Login Staff Account " />
                         <TextField fx:id="sf_username" layoutX="40.0" layoutY="124.0" prefHeight="30.0" prefWidth="220.0" promptText="UserName" />
-                        <PasswordField fx:id="sf_password" layoutX="40.0" layoutY="170.0" prefHeight="30.0" prefWidth="220.0" promptText="Password" />
+                        <PasswordField fx:id="staff_password" layoutX="40.0" layoutY="170.0" prefHeight="30.0" prefWidth="220.0" promptText="Password" />
                         <Button fx:id="sf_login" layoutX="40.0" layoutY="228.0" mnemonicParsing="false" onAction="#loginEmployee" prefHeight="43.0" prefWidth="220.0" text="Login for Staff" />
                         <FontAwesomeIcon glyphName="USERS" layoutX="130.0" layoutY="64.0" size="2em" text="" />
                         <Hyperlink fx:id="sf_forgot" layoutX="40.0" layoutY="204.0" text="ForgotPassword ?" />

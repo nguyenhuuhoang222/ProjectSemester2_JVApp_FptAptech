@@ -62,83 +62,68 @@ public class PrimaryController {
         // Initialize database connection
         connect = ConnectDB.connectDB();
     }
- 
-  
-@FXML
-public void loginAdmin() {
-    // Kiểm tra nếu trường username hoặc password trống
-    if (ad_username.getText().isEmpty() || ad_password.getText().isEmpty()) {
-        alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error Message");
-        alert.setHeaderText(null);
-        alert.setContentText("Please enter both Username and Password.");
-        alert.showAndWait();
-    } else {
-        // Câu lệnh SQL để kiểm tra thông tin đăng nhập
-        String selectData = "SELECT admin_name, password FROM admins WHERE admin_name = ? AND password = ?";
 
-        try {
-            // Chuẩn bị câu truy vấn với tham số từ giao diện
-            prepare = connect.prepareStatement(selectData);
-            prepare.setString(1, ad_username.getText());
-            prepare.setString(2, ad_password.getText());
-
-            result = prepare.executeQuery();
-
-            // Kiểm tra kết quả trả về
-            if (result.next()) {
-                // Lấy tên admin từ kết quả
-                String adminName = result.getString("admin_name");
-
-                // Hiển thị thông báo đăng nhập thành công
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Information Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Successfully Logged In as Admin!");
-                alert.showAndWait();
-
-                // Tải giao diện chính từ MainForm.fxml
-FXMLLoader loader = new FXMLLoader(getClass().getResource("MainForm.fxml"));
-                Parent root = loader.load();
-
-                // Truyền tên admin vào MainFormController
-                MainFormController mainFormController = loader.getController();
-                mainFormController.setAdminName(adminName);
-
-                // Tạo một cửa sổ mới cho giao diện chính
-                Stage stage = new Stage();
-                Scene scene = new Scene(root);
-                stage.setTitle("Shoe Store Management System");
-                stage.setMinWidth(1100);
-                stage.setMinHeight(600);
-                stage.setScene(scene);
-                stage.show();
-
-                // Ẩn cửa sổ đăng nhập sau khi đăng nhập thành công
-                ad_login.getScene().getWindow().hide();
-
-            } else {
-                // Trường hợp đăng nhập thất bại (username hoặc password không đúng)
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Login Failed");
-                alert.setHeaderText(null);
-                alert.setContentText("Invalid username or password. Please try again.");
-                alert.showAndWait();
-            }
-
-        } catch (SQLException | IOException e) {
-            // Xử lý ngoại lệ SQL hoặc IO (khi load FXML)
+    @FXML
+    public void loginAdmin() {
+        if (ad_username.getText().isEmpty() || ad_password.getText().isEmpty()) {
             alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Database or IO Error");
+            alert.setTitle("Error Message");
             alert.setHeaderText(null);
-            alert.setContentText("There was a problem with the login process. Please try again later.");
+            alert.setContentText("Please enter both Username and Password.");
             alert.showAndWait();
-            e.printStackTrace();
+        } else {
+            String selectData = "SELECT admin_name, password FROM admins WHERE admin_name = ? AND password = ?";
+
+            try {
+                prepare = connect.prepareStatement(selectData);
+                prepare.setString(1, ad_username.getText());
+                prepare.setString(2, ad_password.getText());
+
+                result = prepare.executeQuery();
+
+                if (result.next()) {
+                    String adminName = result.getString("admin_name");
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Logged In as Admin!");
+                    alert.showAndWait();
+
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("MainForm.fxml"));
+                    Parent root = loader.load();
+
+                    MainFormController mainFormController = loader.getController();
+                    mainFormController.setAdminName(adminName);
+
+                    Stage stage = new Stage();
+                    Scene scene = new Scene(root);
+                    stage.setTitle("Shoe Store Management System - Admin");
+                    stage.setMinWidth(1100);
+                    stage.setMinHeight(600);
+                    stage.setScene(scene);
+                    stage.show();
+
+                    ad_login.getScene().getWindow().hide();
+
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Login Failed");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Invalid username or password. Please try again.");
+                    alert.showAndWait();
+                }
+
+            } catch (SQLException | IOException e) {
+                alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Database or IO Error");
+                alert.setHeaderText(null);
+                alert.setContentText("There was a problem with the login process. Please try again later.");
+                alert.showAndWait();
+                e.printStackTrace();
+            }
         }
     }
-}
-
-
 
     @FXML
     public void loginEmployee() throws IOException {
@@ -159,11 +144,32 @@ FXMLLoader loader = new FXMLLoader(getClass().getResource("MainForm.fxml"));
                 result = prepare.executeQuery();
 
                 if (result.next()) {
+                    // Display login success message
                     alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Information Message");
                     alert.setHeaderText(null);
                     alert.setContentText("Successfully Logged In as Employee!");
                     alert.showAndWait();
+
+                    // Load MainFormEmployee.fxml for Employee interface
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFormEmployee.fxml"));
+                    Parent root = loader.load();
+
+                    // Obtain controller for employee main form to set data if needed
+                    MainFormEmployeeController mainFormEmployeeController = loader.getController();
+                    mainFormEmployeeController.setEmployeeName(result.getString("employee_name"));
+
+                    // Setup new stage and scene for employee main form
+                    Stage stage = new Stage();
+                    Scene scene = new Scene(root);
+                    stage.setTitle("Shoe Store Management System - Employee");
+                    stage.setMinWidth(900);
+                    stage.setMinHeight(500);
+                    stage.setScene(scene);
+                    stage.show();
+
+                    // Hide login window
+                    sf_login.getScene().getWindow().hide();
 
                 } else {
                     alert = new Alert(Alert.AlertType.ERROR);

@@ -23,6 +23,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * Shoes Store Controller for managing products.
@@ -61,10 +63,15 @@ private Button employeeClearbtn;
 private Button employeeDeletebtn;
 @FXML
 private Button employeeUpdatebtn;
+@FXML
+private TableColumn<Brand, Integer> col_ProductCount;
        @FXML
     private AnchorPane mainpage;
            @FXML
     private AnchorPane productManagementPage;
+           
+           @FXML
+private AnchorPane brandManagementPage; 
            
     @FXML
     private AnchorPane employeeManagementPage;
@@ -73,7 +80,9 @@ private Button employeeUpdatebtn;
     private Button productAddBtn, productClearBtn, productDeleteBtn, productUpdateBtn, logoutBtn;
 
     @FXML
-    private TextField productNameFd, productBrandFd, productPriceFd, productQuantityFd;
+    private TextField productNameFd, productPriceFd, productQuantityFd;
+        @FXML
+    private ComboBox<Brand> productBrandComboBox;
 
     @FXML
     private TextArea productDescription;
@@ -91,6 +100,20 @@ private Button employeeUpdatebtn;
     private TableView<Product> productTableView;
  @FXML
         private TableView<Employee> employeeTableView;
+ 
+    @FXML
+    private TextField brandNameFd;
+
+    @FXML
+    private TableView<Brand> brandTableView;
+    @FXML
+private TableColumn<Brand, Integer> col_BrandId; // Cột cho brand_id
+@FXML
+private TableColumn<Brand, String> col_BrandName; // Cột cho brand_name
+@FXML
+private TableColumn<Brand, Date> col_CreatedAt; // Cột cho created_at
+@FXML
+private TableColumn<Brand, Date> col_UpdatedAt; // Cột cho updated_at
 
     @FXML
     private TableColumn<Product, Integer> colId;
@@ -121,6 +144,8 @@ private Button employeeUpdatebtn;
 
   
       ObservableList<Customer> customerList = FXCollections.observableArrayList();
+       ObservableList<Brand> brandList = FXCollections.observableArrayList();
+
 
 
     private static final String[] SHOE_SIZES = {
@@ -129,41 +154,55 @@ private Button employeeUpdatebtn;
         "Size 44: 28 cm", "Size 45: 29 cm"
     };
     //chuyen trang 
-    @FXML
-public void showMainPageReports() {
-    // Hiển thị trang báo cáo chính
-    mainpage.setVisible(true);
-    productManagementPage.setVisible(false);
-    employeeManagementPage.setVisible(false);
-    customerManagementPage.setVisible(false);
+@FXML
+public void showMainPage() {
+    setAllPagesVisibility(false);
+    mainpage.setVisible(true); // Hiển thị trang chính
+    // Thêm bất kỳ logic làm mới nào cần thiết cho trang chính
 }
 
 @FXML
 public void showProductManagementPage() {
-    // Hiển thị trang quản lý sản phẩm
-    mainpage.setVisible(false);
-    productManagementPage.setVisible(true);
-    employeeManagementPage.setVisible(false);
-    customerManagementPage.setVisible(false);
+    setAllPagesVisibility(false);
+    productManagementPage.setVisible(true); // Hiển thị trang quản lý sản phẩm
+    loadProducts(); // Làm mới danh sách sản phẩm
+    refreshBrandComboBox(); // Làm mới danh sách thương hiệu
 }
+
 
 @FXML
 public void showEmployeeManagementPage() {
-    // Hiển thị trang quản lý nhân viên
-    mainpage.setVisible(false);
-    productManagementPage.setVisible(false);
-    employeeManagementPage.setVisible(true);
-    customerManagementPage.setVisible(false);
+    setAllPagesVisibility(false);
+    employeeManagementPage.setVisible(true); // Hiển thị trang quản lý nhân viên
+    loadEmployees(); // Làm mới danh sách nhân viên
 }
 
 @FXML
 public void showCustomerManagementPage() {
-    // Hiển thị trang quản lý khách hàng
-    mainpage.setVisible(false);
-    productManagementPage.setVisible(false);
-    employeeManagementPage.setVisible(false);
-    customerManagementPage.setVisible(true);
+    setAllPagesVisibility(false);
+    customerManagementPage.setVisible(true); // Hiển thị trang quản lý khách hàng
+    loadCustomers(); // Làm mới danh sách khách hàng
 }
+
+@FXML
+public void showBrandManagementPage() {
+    setAllPagesVisibility(false);
+    brandManagementPage.setVisible(true); // Hiển thị trang quản lý thương hiệu
+     refreshBrandComboBox(); // Làm mới danh sách thương hiệu
+}
+
+
+
+
+// Phương thức giúp ẩn tất cả các trang
+private void setAllPagesVisibility(boolean visible) {
+    mainpage.setVisible(visible);
+    productManagementPage.setVisible(visible);
+    employeeManagementPage.setVisible(visible);
+    customerManagementPage.setVisible(visible);
+    brandManagementPage.setVisible(visible);
+}
+
 
     // query
     private static final String SELECT_PRODUCTS_QUERY = "SELECT * FROM products";
@@ -181,10 +220,64 @@ public void showCustomerManagementPage() {
         loadProducts();
         initializeGender();
         initializeEmployee();
-        showMainPageReports();
+        showMainPage();
         initializeCustomer();
         initializeCustomerGender();
+        initializeBrand();
+         refreshBrandComboBox();
     }
+private void  refreshBrandComboBox() {
+    String query = "SELECT brand_id, brand_name FROM brands"; // Query to get brand_id and brand_name
+    ObservableList<Brand> brandList = FXCollections.observableArrayList(); // Initialize list of Brand objects
+
+    try (Connection conn = ConnectDB.connectDB();
+         PreparedStatement stmt = conn.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
+
+        while (rs.next()) {
+            int brandId = rs.getInt("brand_id");
+            String brandName = rs.getString("brand_name");
+
+            // Create Brand object and add it to the list
+            brandList.add(new Brand(brandId, brandName));
+        }
+
+        // Set the items of ComboBox to the list of Brand objects
+        productBrandComboBox.setItems(brandList);
+
+        // Set a cell factory to display only the brand names
+        productBrandComboBox.setCellFactory(comboBox -> new ListCell<Brand>() {
+            @Override
+            protected void updateItem(Brand brand, boolean empty) {
+                super.updateItem(brand, empty);
+                if (empty || brand == null) {
+                    setText(null);
+                } else {
+                    setText(brand.getBrandName());
+                }
+            }
+        });
+
+        // Set a button cell to display the selected brand name
+        productBrandComboBox.setButtonCell(new ListCell<Brand>() {
+            @Override
+            protected void updateItem(Brand brand, boolean empty) {
+                super.updateItem(brand, empty);
+                if (empty || brand == null) {
+                    setText(null);
+                } else {
+                    setText(brand.getBrandName());
+                }
+            }
+        });
+
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to load brands: " + e.getMessage());
+    }
+}
+
+
+
 
     @FXML
     public void importImage() {
@@ -213,44 +306,45 @@ public void showCustomerManagementPage() {
         customerGenderDd.setItems(FXCollections.observableArrayList("Male", "Female"));
     }
 
-    private void initializeTableView() {
-        // Set up the cell value factories for each column in the TableView
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colBrand.setCellValueFactory(new PropertyValueFactory<>("brand"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
-        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-        colSize.setCellValueFactory(new PropertyValueFactory<>("size"));
+private void initializeTableView() {
+    // Set up the cell value factories for each column in the TableView
+    colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+    colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+    colBrand.setCellValueFactory(new PropertyValueFactory<>("brandName")); // Use brandName for the brand column
+    colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
+    colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+    colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
+    colSize.setCellValueFactory(new PropertyValueFactory<>("size"));
 
-        // Configure the image column to display images from URLs
-        colImage.setCellValueFactory(new PropertyValueFactory<>("imageUrl"));
-        colImage.setCellFactory(column -> new TableCell<Product, String>() {
-            private final ImageView imageView = new ImageView(); // ImageView to hold the image in each cell
+    // Configure the image column to display images from URLs
+    colImage.setCellValueFactory(new PropertyValueFactory<>("imageUrl"));
+    colImage.setCellFactory(column -> new TableCell<Product, String>() {
+        private final ImageView imageView = new ImageView(); // ImageView to hold the image in each cell
 
-            @Override
-            protected void updateItem(String imageUrl, boolean empty) {
-                super.updateItem(imageUrl, empty);
+        @Override
+        protected void updateItem(String imageUrl, boolean empty) {
+            super.updateItem(imageUrl, empty);
 
-                if (empty || imageUrl == null || imageUrl.isEmpty()) {
-                    // If no image URL is provided, do not display an ImageView
-                    setGraphic(null);
-                } else {
-                    try {
-                        // Load the image from the URL with specific dimensions for performance
-                        Image image = new Image(imageUrl, 50, 50, true, true);
-                        imageView.setImage(image);
-                        imageView.setFitHeight(50); // Set the height of the image
-                        imageView.setFitWidth(50); // Set the width of the image
-                        setGraphic(imageView); // Display the ImageView in the cell
-                    } catch (Exception e) {
-                        System.out.println("Error loading image: " + imageUrl);
-                        setGraphic(null); // Do not display anything if image loading fails
-                    }
+            if (empty || imageUrl == null || imageUrl.isEmpty()) {
+                // If no image URL is provided, do not display an ImageView
+                setGraphic(null);
+            } else {
+                try {
+                    // Load the image from the URL with specific dimensions for performance
+                    Image image = new Image(imageUrl, 50, 50, true, true);
+                    imageView.setImage(image);
+                    imageView.setFitHeight(50); // Set the height of the image
+                    imageView.setFitWidth(50); // Set the width of the image
+                    setGraphic(imageView); // Display the ImageView in the cell
+                } catch (Exception e) {
+                    System.out.println("Error loading image: " + imageUrl);
+                    setGraphic(null); // Do not display anything if image loading fails
                 }
             }
-        });
-    }
+        }
+    });
+}
+
 
     public void setAdminName(String adminName) {
         accName.setText("Welcome, " + adminName + "!");
@@ -290,7 +384,8 @@ private void closeCurrentWindow() {
     @FXML
     public void clearForm() {
         productNameFd.clear();
-        productBrandFd.clear();
+        productBrandComboBox.getSelectionModel().clearSelection();
+
         productPriceFd.clear();
         productQuantityFd.clear();
         productDescription.clear();
@@ -298,34 +393,58 @@ private void closeCurrentWindow() {
         productImageView.setImage(null); // Clear the ImageView
     }
 
-    @FXML
-    public void addProduct() {
-        String name = productNameFd.getText();
-        String brand = productBrandFd.getText();
-        String priceStr = productPriceFd.getText();
-        String quantityStr = productQuantityFd.getText();
-        String description = productDescription.getText();
-        String size = productSizeComboBox.getSelectionModel().getSelectedItem();
-        String imageUrl = productImageView.getImage() != null ? productImageView.getImage().getUrl() : null;
 
-        if (!areInputsValidP(name, brand, priceStr, quantityStr, size, imageUrl)) {
-            return;
-        }
+@FXML
+public void addProduct() {
+    // Retrieve input values
+    String name = productNameFd.getText().trim();
+    Brand brand = productBrandComboBox.getSelectionModel().getSelectedItem(); // Ensure Brand is correctly retrieved
+    String priceStr = productPriceFd.getText().trim();
+    String quantityStr = productQuantityFd.getText().trim();
+    String description = productDescription.getText().trim();
+    String size = productSizeComboBox.getSelectionModel().getSelectedItem();
+    String imageUrl = (productImageView.getImage() != null) ? productImageView.getImage().getUrl() : null;
 
-        double price = Double.parseDouble(priceStr);
-        int quantity = Integer.parseInt(quantityStr);
-        Product product = new Product(0, name, brand, price, quantity, description, size, imageUrl);
-
-        if (product.saveToDatabase()) {
-            showAlert("Success", "Product added successfully.");
-            clearForm();
-            loadProducts(); // Refresh the table view
-        } else {
-            showAlert("Error", "Failed to add product. Please try again.");
-        }
+    // Validate inputs
+    if (!areInputsValidP(name, brand, priceStr, quantityStr, size, imageUrl)) {
+        showAlert("Validation Error", "Please fill in all required fields correctly.");
+        return;
     }
 
-   private boolean areInputsValidP(String name, String brand, String price, String quantity, String size, String imageUrl) {
+    // Attempt to parse price and quantity
+    double price;
+    int quantity;
+    try {
+        price = Double.parseDouble(priceStr);
+        quantity = Integer.parseInt(quantityStr);
+    } catch (NumberFormatException e) {
+        showAlert("Input Error", "Price and Quantity must be valid numbers.");
+        return;
+    }
+
+    // Check if brand is selected
+    if (brand == null) {
+        showAlert("Input Error", "Please select a valid brand.");
+        return;
+    }
+
+    // Create the Product object with brand name
+    Product product = new Product(0, name, brand.getBrandName(), price, quantity, description, size, imageUrl);
+
+    // Save the product to the database
+    if (product.saveToDatabase()) {
+        showAlert("Success", "Product added successfully.");
+        clearForm();
+        loadProducts(); // Refresh the table view
+    } else {
+        showAlert("Error", "Failed to add product. Please try again.");
+    }
+}
+
+
+
+
+private boolean areInputsValidP(String name, Brand brand, String price, String quantity, String size, String imageUrl) {
     // Kiểm tra độ dài của name
     if (name.length() < 5 || name.length() > 25) {
         showAlert("Error", "Name must be between 5 and 25 characters.");
@@ -333,8 +452,8 @@ private void closeCurrentWindow() {
     }
     
     // Kiểm tra brand không null
-    if (brand == null || brand.isEmpty()) {
-        showAlert("Error", "Brand cannot be null or empty.");
+    if (brand == null) {
+        showAlert("Error", "Brand cannot be null.");
         return false;
     }
     
@@ -376,6 +495,7 @@ private void closeCurrentWindow() {
     return true;
 }
 
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
@@ -391,30 +511,38 @@ private void closeCurrentWindow() {
         return alert.showAndWait();
     }
 
-    private void loadProducts() {
-        ObservableList<Product> productList = FXCollections.observableArrayList();
+private void loadProducts() {
+    ObservableList<Product> productList = FXCollections.observableArrayList();
+    String query = "SELECT p.product_id, p.product_name, p.price, p.quantity, p.description, p.product_size, p.image_url, b.brand_name " +
+                   "FROM products p " +
+                   "JOIN brands b ON p.brand_id = b.brand_id"; // Assuming there's a foreign key relationship
 
-        try (Connection conn = ConnectDB.connectDB(); PreparedStatement stmt = conn.prepareStatement(SELECT_PRODUCTS_QUERY); ResultSet rs = stmt.executeQuery()) {
+    try (Connection conn = ConnectDB.connectDB();
+         PreparedStatement stmt = conn.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                Product product = new Product(
-                        rs.getInt("product_id"),
-                        rs.getString("product_name"),
-                        rs.getString("brand"),
-                        rs.getDouble("price"),
-                        rs.getInt("quantity"),
-                        rs.getString("description"),
-                        rs.getString("product_size"),
-                        rs.getString("image_url")
-                );
-                productList.add(product);
-            }
-        } catch (SQLException e) {
-            showAlert("Error", "Failed to load products from the database: " + e.getMessage());
+        while (rs.next()) {
+            // Create a Product object from the ResultSet
+            Product product = new Product(
+                rs.getInt("product_id"),
+                rs.getString("product_name"),
+                rs.getString("brand_name"), // Get the brand name directly
+                rs.getDouble("price"),
+                rs.getInt("quantity"),
+                rs.getString("description"),
+                rs.getString("product_size"),
+                rs.getString("image_url")
+            );
+            productList.add(product); // Add product to the list
         }
-
-        productTableView.setItems(productList);
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to load products from the database: " + e.getMessage());
     }
+
+    productTableView.setItems(productList); // Set the product list in the TableView
+}
+
+
 
    @FXML
 public void handleRowSelect() {
@@ -440,9 +568,31 @@ public void handleCustomerRowSelect() {
     }
 }
 
+
+@FXML
+public void handleBrandRowSelect() {
+    Brand selectedBrand = brandTableView.getSelectionModel().getSelectedItem(); // Thay đổi để lấy thương hiệu đã chọn
+    if (selectedBrand != null) {
+        populateBrandForm(selectedBrand); // Gọi phương thức populateBrandForm
+    }
+}
+
+private void populateBrandForm(Brand brand) {
+    brandNameFd.setText(brand.getBrandName()); 
+}
+
+
 private void populateProductForm(Product product) {
     productNameFd.setText(product.getName());
-    productBrandFd.setText(product.getBrand());
+
+    // Find the Brand object by name and select it in the ComboBox
+    for (Brand brand : productBrandComboBox.getItems()) {
+        if (brand.getBrandName().equals(product.getBrandName())) {
+            productBrandComboBox.getSelectionModel().select(brand);
+            break;
+        }
+    }
+
     productPriceFd.setText(String.valueOf(product.getPrice()));
     productQuantityFd.setText(String.valueOf(product.getQuantity()));
     productDescription.setText(product.getDescription());
@@ -494,57 +644,88 @@ private void populateCustomerForm(Customer customer) {
         }
     }
 
-    @FXML
-    public void updateProduct() {
-        Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
+  
+@FXML
+public void updateProduct() {
+    Product selectedProduct = productTableView.getSelectionModel().getSelectedItem();
 
-        if (selectedProduct == null) {
-            showAlert("Error", "No product selected.");
-            return;
-        }
-
-        String name = productNameFd.getText();
-        String brand = productBrandFd.getText();
-        String priceStr = productPriceFd.getText();
-        String quantityStr = productQuantityFd.getText();
-        String description = productDescription.getText();
-        String size = productSizeComboBox.getSelectionModel().getSelectedItem();
-        String imageUrl = productImageView.getImage() != null ? productImageView.getImage().getUrl() : null;
-
-        if (!areInputsValidP(name, brand, priceStr, quantityStr, size, imageUrl)) {
-            return;
-        }
-
-        double price = Double.parseDouble(priceStr);
-        int quantity = Integer.parseInt(quantityStr);
-
-        Product updatedProduct = new Product(selectedProduct.getId(), name, brand, price, quantity, description, size, imageUrl);
-
-        if (updateProductInDatabase(updatedProduct, selectedProduct.getName())) {
-            showAlert("Success", "Product updated successfully.");
-            loadProducts(); // Refresh the table view
-        } else {
-            showAlert("Error", "Failed to update product. Please try again.");
-        }
+    // Check if a product is selected
+    if (selectedProduct == null) {
+        showAlert("Error", "No product selected.");
+        return;
     }
 
-    private boolean updateProductInDatabase(Product updatedProduct, String oldProductName) {
-        try (Connection conn = ConnectDB.connectDB(); PreparedStatement stmt = conn.prepareStatement(UPDATE_PRODUCT_QUERY)) {
-            stmt.setString(1, updatedProduct.getName());
-            stmt.setString(2, updatedProduct.getBrand());
-            stmt.setDouble(3, updatedProduct.getPrice());
-            stmt.setInt(4, updatedProduct.getQuantity());
-            stmt.setString(5, updatedProduct.getDescription());
-            stmt.setString(6, updatedProduct.getSize());
-            stmt.setString(7, updatedProduct.getImageUrl());
-            stmt.setString(8, oldProductName);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            showAlert("Error", "Failed to update product: " + e.getMessage());
-            return false;
-        }
+    // Get data from input fields
+    String name = productNameFd.getText();
+    Brand selectedBrand = productBrandComboBox.getSelectionModel().getSelectedItem(); // Get selected Brand
+    String priceStr = productPriceFd.getText();
+    String quantityStr = productQuantityFd.getText();
+    String description = productDescription.getText();
+    String size = productSizeComboBox.getSelectionModel().getSelectedItem();
+    String imageUrl = productImageView.getImage() != null ? productImageView.getImage().getUrl() : null;
 
+    // Validate inputs
+    if (!areInputsValidP(name, selectedBrand, priceStr, quantityStr, size, imageUrl)) {
+        return;
     }
+
+    // Convert price and quantity to their respective data types
+    double price;
+    int quantity;
+    try {
+        price = Double.parseDouble(priceStr);
+        quantity = Integer.parseInt(quantityStr);
+    } catch (NumberFormatException e) {
+        showAlert("Error", "Invalid price or quantity format.");
+        return;
+    }
+
+    // Create a new Product object for updating
+    Product updatedProduct = new Product(
+        selectedProduct.getId(),
+        name,
+        selectedBrand.getBrandName(), // Use selected brand name
+        price,
+        quantity,
+        description,
+        size,
+        imageUrl
+    );
+
+    // Update product in the database
+    if (updateProductInDatabase(updatedProduct, selectedProduct.getName())) {
+        showAlert("Success", "Product updated successfully.");
+        loadProducts(); // Refresh TableView
+    } else {
+        showAlert("Error", "Failed to update product. Please try again.");
+    }
+}
+
+
+private boolean updateProductInDatabase(Product updatedProduct, String oldProductName) {
+    String updateQuery = "UPDATE products SET product_name = ?, brand_id = ?, price = ?, quantity = ?, description = ?, product_size = ?, image_url = ? WHERE product_name = ?";
+
+    try (Connection conn = ConnectDB.connectDB(); 
+         PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+        
+        stmt.setString(1, updatedProduct.getName());
+        stmt.setInt(2, updatedProduct.getBrandId()); // Use brand ID
+        stmt.setDouble(3, updatedProduct.getPrice());
+        stmt.setInt(4, updatedProduct.getQuantity());
+        stmt.setString(5, updatedProduct.getDescription());
+        stmt.setString(6, updatedProduct.getSize());
+        stmt.setString(7, updatedProduct.getImageUrl());
+        stmt.setString(8, oldProductName);
+
+        return stmt.executeUpdate() > 0; // Return true if update is successful
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to update product: " + e.getMessage());
+        return false; // Return false if an error occurs
+    }
+}
+
+
+
 //EMployee
    @FXML
 public void addEmployee() {
@@ -613,6 +794,7 @@ public void updateEmployee() {
         showAlert("Error", "Failed to update employee: " + e.getMessage());
     }
 }
+
 
 @FXML
 public void deleteEmployee() {
@@ -689,6 +871,19 @@ public void clearEmployeeForm() {
     employeeGenderDd.setValue(null);
 }
 
+@FXML
+public void initializeBrand() {
+    // Set up the cell value factories for each column
+    col_BrandId.setCellValueFactory(new PropertyValueFactory<>("brandId")); // ID
+    col_BrandName.setCellValueFactory(new PropertyValueFactory<>("brandName")); // Name
+    col_CreatedAt.setCellValueFactory(new PropertyValueFactory<>("createdAt")); // created_at
+    col_UpdatedAt.setCellValueFactory(new PropertyValueFactory<>("updatedAt")); // updated_at
+    col_ProductCount.setCellValueFactory(new PropertyValueFactory<>("productCount")); // Product Count
+
+    // Load data into the table
+    loadBrands();
+}
+
    @FXML
     public void initializeEmployee() {
         // Set up the columns to match Employee properties
@@ -732,8 +927,10 @@ public void clearEmployeeForm() {
         employeeTableView.setItems(employeeList);
     }
     
-    //Customer 
-      @FXML
+    //Customer
+    
+    @FXML
+      
     public void addCustomer() {
         String name = customerNameFd.getText();
         String email = customerEmailFd.getText();
@@ -872,7 +1069,146 @@ private boolean areCustomerInputsValid(String name, String email, String phone, 
 
         // Bind the list to the TableView
         customerTableView.setItems(customerList);
+        
+        
+
     }
+      // Thêm thương hiệu mới
+@FXML
+public void addBrand() {
+    String name = brandNameFd.getText(); // Get brand name from input field
+    Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // Current timestamp
+
+    if (name == null || name.trim().isEmpty()) {
+        showAlert("Error", "Brand name is required.");
+        return;
+    }
+
+    try (Connection conn = ConnectDB.connectDB();
+         PreparedStatement stmt = conn.prepareStatement(
+             "INSERT INTO brands (brand_name, created_at, updated_at) VALUES (?, ?, ?)")) {
+        
+        stmt.setString(1, name);
+        stmt.setTimestamp(2, currentTime);
+        stmt.setTimestamp(3, currentTime);
+
+        int rowsInserted = stmt.executeUpdate();
+        if (rowsInserted > 0) {
+            showAlert("Success", "Brand added successfully.");
+            clearBrandForm();
+            loadBrands();
+        }
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to add brand: " + e.getMessage());
+    }
+}
+
+public void clearBrandForm() {
+    brandNameFd.clear(); // Clear input field
+}
+
+public void loadBrands() {
+    brandList.clear(); // Clear current list to reload fresh data
+
+    String query = "SELECT b.brand_id, b.brand_name, b.created_at, b.updated_at, " +
+               "COUNT(p.product_id) AS product_count " +
+               "FROM brands b " +
+               "LEFT JOIN products p ON b.brand_id = p.brand_id " +
+               "GROUP BY b.brand_id, b.brand_name, b.created_at, b.updated_at";
+
+
+    try (Connection conn = ConnectDB.connectDB();
+         PreparedStatement stmt = conn.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
+
+        while (rs.next()) {
+            int brandId = rs.getInt("brand_id");
+            String brandName = rs.getString("brand_name");
+            Timestamp createdAt = rs.getTimestamp("created_at");
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            int productCount = rs.getInt("product_count");
+
+            Brand brand = new Brand(brandId, brandName, createdAt, updatedAt, productCount);
+            brandList.add(brand);
+        }
+
+        brandTableView.setItems(brandList);
+
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to load brands: " + e.getMessage());
+    }
+}
+
+@FXML
+public void updateBrand() {
+    Brand selectedBrand = brandTableView.getSelectionModel().getSelectedItem();
+    if (selectedBrand == null) {
+        showAlert("Error", "Please select a brand to update.");
+        return;
+    }
+
+    String newName = brandNameFd.getText();
+    Timestamp updatedAt = new Timestamp(System.currentTimeMillis());
+
+    if (newName == null || newName.trim().isEmpty()) {
+        showAlert("Error", "Brand name is required.");
+        return;
+    }
+
+    try (Connection conn = ConnectDB.connectDB();
+         PreparedStatement stmt = conn.prepareStatement(
+             "UPDATE brands SET brand_name = ?, updated_at = ? WHERE brand_id = ?")) {
+        
+        stmt.setString(1, newName);
+        stmt.setTimestamp(2, updatedAt);
+        stmt.setInt(3, selectedBrand.getBrandId());
+
+        int rowsUpdated = stmt.executeUpdate();
+        if (rowsUpdated > 0) {
+            showAlert("Success", "Brand updated successfully.");
+            clearBrandForm();
+            loadBrands();
+        }
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to update brand: " + e.getMessage());
+    }
+}
+
+@FXML
+public void deleteBrand() {
+    Brand selectedBrand = brandTableView.getSelectionModel().getSelectedItem();
+    if (selectedBrand == null) {
+        showAlert("Error", "Please select a brand to delete.");
+        return;
+    }
+
+    Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+    confirmationAlert.setTitle("Delete Brand");
+    confirmationAlert.setHeaderText(null);
+    confirmationAlert.setContentText("Are you sure you want to delete this brand?");
+    Optional<ButtonType> result = confirmationAlert.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.CANCEL) {
+        return;
+    }
+
+    try (Connection conn = ConnectDB.connectDB();
+         PreparedStatement stmt = conn.prepareStatement("DELETE FROM brands WHERE brand_id = ?")) {
+        
+        stmt.setInt(1, selectedBrand.getBrandId());
+
+        int rowsDeleted = stmt.executeUpdate();
+        if (rowsDeleted > 0) {
+            showAlert("Success", "Brand deleted successfully.");
+            clearBrandForm();
+            loadBrands();
+        }
+    } catch (SQLException e) {
+        showAlert("Error", "Failed to delete brand: " + e.getMessage());
+    }
+}
+
+
+
 }
 
     

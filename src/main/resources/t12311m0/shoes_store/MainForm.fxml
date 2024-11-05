@@ -38,7 +38,7 @@
                                  <children>
                                     <AnchorPane prefHeight="106.0" prefWidth="224.0" styleClass="header" stylesheets="@MainForm.css">
                                        <children>
-                                          <ImageView fitHeight="172.0" fitWidth="170.0" layoutX="27.0" layoutY="-14.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="188.0" fitWidth="170.0" layoutX="27.0" layoutY="-14.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@image/Black_Logo-removebg-preview.png" />
                                              </image>
@@ -46,10 +46,10 @@
                                           <Label fx:id="accName" layoutX="14.0" layoutY="148.0" />
                                        </children>
                                     </AnchorPane>
-                                    <Button fx:id="r_r_btn" layoutX="17.0" layoutY="375.0" mnemonicParsing="false" onAction="#showMainPageReports" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Revenue Reports" />
-                                    <Button fx:id="m_f_btn" layoutX="17.0" layoutY="321.0" mnemonicParsing="false" onAction="#showCustomerManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Customer" />
-                                    <Button layoutX="16.0" layoutY="260.0" mnemonicParsing="false" onAction="#showProductManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Product" />
-                                    <Button fx:id="m_e_btn" layoutX="16.0" layoutY="197.0" mnemonicParsing="false" onAction="#showEmployeeManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Employee" />
+                                    <Button fx:id="r_r_btn" layoutX="17.0" layoutY="180.0" mnemonicParsing="false" onAction="#showMainPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Dash Board" />
+                                    <Button fx:id="m_f_btn" layoutX="16.0" layoutY="352.0" mnemonicParsing="false" onAction="#showCustomerManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Customer" />
+                                    <Button layoutX="16.0" layoutY="292.0" mnemonicParsing="false" onAction="#showProductManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Product" />
+                                    <Button fx:id="m_e_btn" layoutX="17.0" layoutY="233.0" mnemonicParsing="false" onAction="#showEmployeeManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Employee" />
                                     <Button fx:id="logoutButton" layoutX="3.0" layoutY="580.0" mnemonicParsing="false" onAction="#logout" prefHeight="26.0" prefWidth="41.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="3.0">
                                        <graphic>
                                           <FontAwesomeIcon glyphName="SIGN_OUT" styleClass="nav-btn" />
@@ -57,6 +57,7 @@
                                     </Button>
                                     <Label layoutX="51.0" layoutY="577.0" style="-fx-text-fill: white;" text="Sign Out" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="51.0" />
                                     <Separator layoutX="-1.0" layoutY="115.0" prefHeight="10.0" prefWidth="224.0" />
+                                    <Button layoutX="16.0" layoutY="406.0" mnemonicParsing="false" onAction="#showBrandManagementPage" prefHeight="40.0" prefWidth="190.0" styleClass="nav-btn" stylesheets="@MainForm.css" text="Manage Brand" />
                                  </children>
                               </AnchorPane>
                            </children>
@@ -197,7 +198,6 @@
                                     <TextField fx:id="productPriceFd" layoutX="131.0" layoutY="59.0" prefHeight="26.0" prefWidth="155.0" promptText="0.00$" />
                                     <TextField fx:id="productQuantityFd" layoutX="131.0" layoutY="99.0" prefHeight="26.0" prefWidth="155.0" promptText="0" />
                                     <Label layoutX="71.0" layoutY="104.0" text="Quantity:" textFill="WHITE" />
-                                    <TextField fx:id="productBrandFd" layoutX="131.0" layoutY="141.0" prefHeight="26.0" prefWidth="158.0" />
                                     <Label layoutX="314.0" layoutY="24.0" text="Desciption:" textFill="WHITE" />
                                     <TextArea fx:id="productDescription" layoutX="386.0" layoutY="12.0" prefHeight="155.0" prefWidth="200.0" stylesheets="@MainForm.css">
                                        <styleClass>
@@ -228,6 +228,7 @@
                                     <Button fx:id="Product_deleteBtn" layoutX="672.0" layoutY="193.0" mnemonicParsing="false" onAction="#deleteProduct" styleClass="nav-btn" stylesheets="@MainForm.css" text="Delete Product" AnchorPane.bottomAnchor="22.0" />
                                     <Label layoutX="83.0" layoutY="185.0" text="Size:" textFill="WHITE" />
                                     <ComboBox fx:id="productSizeComboBox" layoutX="131.0" layoutY="180.0" prefHeight="26.0" prefWidth="157.0" promptText="Choose Size" />
+                                    <ComboBox fx:id="productBrandComboBox" layoutX="129.0" layoutY="142.0" prefHeight="26.0" prefWidth="159.0" promptText="Choose Brand" />
                                  </children>
                               </AnchorPane>
                            </children>
@@ -293,7 +294,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="customerManagementPage" layoutX="5.0" layoutY="5.0" prefHeight="605.0" prefWidth="881.0" styleClass="nav-form" stylesheets="@MainForm.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="customerManagementPage" layoutX="5.0" layoutY="5.0" prefHeight="605.0" prefWidth="881.0" styleClass="nav-form" stylesheets="@MainForm.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <AnchorPane layoutX="14.0" layoutY="14.0" prefHeight="321.0" prefWidth="843.0" stylesheets="@MainForm.css" AnchorPane.bottomAnchor="265.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="19.0" AnchorPane.topAnchor="14.0">
                                  <styleClass>
@@ -342,6 +343,58 @@
                                     </ImageView>
                                  </children>
                               </AnchorPane>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="brandManagementPage" prefHeight="600.0" prefWidth="876.0" styleClass="nav-form" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <AnchorPane layoutX="14.0" layoutY="22.0" prefHeight="165.0" prefWidth="291.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="22.0">
+                                 <styleClass>
+                                    <String fx:value="shadow" />
+                                    <String fx:value="white-bg" />
+                                    <String fx:value="radius" />
+                                    <String fx:value="nav-form-small" />
+                                 </styleClass>
+                                 <children>
+                                    <Label layoutX="62.0" layoutY="14.0" text="Brand Management" textFill="WHITE">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Label>
+                                    <Label layoutX="11.0" layoutY="63.0" text="Name:" textFill="WHITE">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="brandNameFd" layoutX="67.0" layoutY="59.0" prefHeight="26.0" prefWidth="156.0" />
+                                    <Button layoutX="112.0" layoutY="123.0" mnemonicParsing="false" onAction="#addBrand" prefHeight="28.0" prefWidth="65.0" styleClass="nav-btn" text="Add" />
+                                    <Button layoutX="30.0" layoutY="123.0" mnemonicParsing="false" onAction="#updateBrand" prefHeight="28.0" prefWidth="65.0" styleClass="nav-btn" text="Update" />
+                                    <Button layoutX="195.0" layoutY="123.0" mnemonicParsing="false" onAction="#deleteBrand" prefHeight="28.0" prefWidth="65.0" styleClass="nav-btn" text="Delete" />
+                                    <Button layoutX="235.0" layoutY="58.0" mnemonicParsing="false" onAction="#clearBrandForm" prefHeight="28.0" prefWidth="51.0" styleClass="nav-btn" text="Clear" />
+                                 </children>
+                              </AnchorPane>
+                              <AnchorPane layoutX="14.0" layoutY="200.0" prefHeight="376.0" prefWidth="803.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="199.0">
+                                 <styleClass>
+                                    <String fx:value="shadow" />
+                                    <String fx:value="radius" />
+                                    <String fx:value="white-bg" />
+                                 </styleClass>
+                                 <children>
+                                    <TableView fx:id="brandTableView" layoutX="-69.0" layoutY="19.0" onMouseClicked="#handleBrandRowSelect" prefHeight="377.0" prefWidth="458.0" styleClass="radius" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <columns>
+                                          <TableColumn fx:id="col_BrandId" prefWidth="47.0" text="ID" />
+                                          <TableColumn fx:id="col_BrandName" prefWidth="203.0" text="Name" />
+                                          <TableColumn fx:id="col_CreatedAt" prefWidth="218.0" text="created_at" />
+                                          <TableColumn fx:id="col_UpdatedAt" prefWidth="220.5" text="updated_at" />
+                                          <TableColumn fx:id="col_ProductCount" minWidth="0.0" prefWidth="113.0" text="Product of Brand" />
+                                       </columns>
+                                    </TableView>
+                                 </children>
+                              </AnchorPane>
+                              <ImageView fitHeight="167.0" fitWidth="200.0" layoutX="325.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true" styleClass="radius" AnchorPane.leftAnchor="325.0" AnchorPane.topAnchor="22.0">
+                                 <image>
+                                    <Image url="@image/Black_Logo-removebg-preview.png" />
+                                 </image>
+                              </ImageView>
                            </children>
                         </AnchorPane>
                      </children>
